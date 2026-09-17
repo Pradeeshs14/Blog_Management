@@ -1,13 +1,23 @@
 from fastapi import APIRouter, Depends, HTTPException
+
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+
 from app.models.like import Like
 from app.models.post import Post
 from app.models.user import User
+
 from app.schemas.like import LikeResponse
+
 from app.core.security import get_current_user
 from app.core.email import send_email
+
+from app.utils.subscription_limits import (
+    get_active_subscription,
+    check_limit,
+)
+
 
 router = APIRouter(
     prefix="/posts/{post_id}/like",
@@ -43,6 +53,24 @@ def like_post(
             status_code=400,
             detail="You already liked this post",
         )
+
+    subscription, plan = get_active_subscription(
+        db,
+        current_user.id,
+    )
+
+    like_count = (
+        db.query(Like)
+        .filter(Like.user_id == current_user.id)
+        .count()
+    )
+
+    check_limit(
+        db,
+        current_user.id,
+        like_count,
+        plan.max_likes,
+    )
 
     like = Like(
         post_id=post_id,

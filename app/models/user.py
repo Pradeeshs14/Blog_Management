@@ -1,4 +1,6 @@
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
+
 from app.database import Base
 
 
@@ -9,3 +11,5 @@ class User(Base):
     username = Column(String(50), unique=True, nullable=False, index=True)
     email = Column(String(100), unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)
+
+    subscriptions = relationship("Subscription", backref="user")

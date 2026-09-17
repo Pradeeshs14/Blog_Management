@@ -1,13 +1,23 @@
 from fastapi import APIRouter, Depends, HTTPException
+
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+
 from app.models.comment import Comment
 from app.models.post import Post
 from app.models.user import User
+
 from app.schemas.comment import CommentCreate, CommentResponse
+
 from app.core.security import get_current_user
 from app.core.email import send_email
+
+from app.utils.subscription_limits import (
+    get_active_subscription,
+    check_limit,
+)
+
 
 router = APIRouter(
     prefix="/posts/{post_id}/comments",
@@ -29,6 +39,24 @@ def create_comment(
             status_code=404,
             detail="Post not found",
         )
+
+    subscription, plan = get_active_subscription(
+        db,
+        current_user.id,
+    )
+
+    comment_count = (
+        db.query(Comment)
+        .filter(Comment.user_id == current_user.id)
+        .count()
+    )
+
+    check_limit(
+        db,
+        current_user.id,
+        comment_count,
+        plan.max_comments,
+    )
 
     comment = Comment(
         post_id=post_id,

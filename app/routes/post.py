@@ -1,10 +1,18 @@
+
 from fastapi import APIRouter, Depends, HTTPException, File, Form, UploadFile, Query
 from sqlalchemy.orm import Session
+
 from app.database import get_db
 from app.models.post import Post
+from app.models.post_image import PostImage
 from app.schemas.post import PostResponse, PaginatedPostResponse
 from app.core.security import get_current_user
 from app.models.user import User
+from app.utils.subscription_limits import (
+    get_active_subscription,
+    check_limit,
+)
+
 import os
 import uuid
 
@@ -27,9 +35,39 @@ def create_post(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    subscription, plan = get_active_subscription(
+        db,
+        current_user.id,
+    )
+
+    post_count = (
+        db.query(Post)
+        .filter(Post.author_id == current_user.id)
+        .count()
+    )
+
+    check_limit(
+        db,
+        current_user.id,
+        post_count,
+        plan.max_posts,
+    )
+
     image_path = None
 
     if image:
+        subscription, plan = get_active_subscription(
+            db,
+            current_user.id,
+        )
+
+        check_limit(
+            db,
+            current_user.id,
+            0,
+            plan.max_images_per_post,
+        )
+
         file_extension = os.path.splitext(image.filename)[1]
         file_name = f"{uuid.uuid4()}{file_extension}"
         file_path = os.path.join(UPLOAD_DIR, file_name)
@@ -50,6 +88,15 @@ def create_post(
     db.commit()
     db.refresh(post)
 
+    if image_path:
+        post_image = PostImage(
+            post_id=post.id,
+            image_path=image_path,
+        )
+
+        db.add(post_image)
+        db.commit()
+
     return post
 
 
@@ -64,9 +111,10 @@ def get_posts(
 
     if search:
         search_term = f"%{search}%"
+
         query = query.filter(
-            (Post.title.ilike(search_term)) |
-            (Post.content.ilike(search_term))
+            (Post.title.ilike(search_term))
+            | (Post.content.ilike(search_term))
         )
 
     total = query.count()
@@ -187,3 +235,73 @@ def delete_post(
     return {
         "message": "Post deleted successfully"
     }
+
+
+@router.post("/{post_id}/images")
+def add_post_image(
+    post_id: int,
+    image: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    post = db.query(Post).filter(Post.id == post_id).first()
+
+    if not post:
+        raise HTTPException(
+            status_code=404,
+            detail="Post not found",
+        )
+
+    if post.author_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="You can only add images to your own posts",
+        )
+
+    subscription, plan = get_active_subscription(
+        db,
+        current_user.id,
+    )
+
+    image_count = (
+        db.query(PostImage)
+        .filter(PostImage.post_id == post_id)
+        .count()
+    )
+
+    check_limit(
+        db,
+        current_user.id,
+        image_count,
+        plan.max_images_per_post,
+    )
+
+    file_extension = os.path.splitext(image.filename)[1]
+    file_name = f"{uuid.uuid4()}{file_extension}"
+
+    file_path = os.path.join(
+        UPLOAD_DIR,
+        file_name,
+    )
+
+    with open(file_path, "wb") as buffer:
+        buffer.write(image.file.read())
+
+    image_path = f"/media/posts/{file_name}"
+
+    post_image = PostImage(
+        post_id=post_id,
+        image_path=image_path,
+    )
+
+    db.add(post_image)
+    db.commit()
+    db.refresh(post_image)
+
+    return {
+        "message": "Image added successfully",
+        "image_id": post_image.id,
+        "post_id": post_id,
+        "image_path": image_path,
+    }
+
