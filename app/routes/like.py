@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 
 from sqlalchemy.orm import Session
 
@@ -11,7 +11,8 @@ from app.models.user import User
 from app.schemas.like import LikeResponse
 
 from app.core.security import get_current_user
-from app.core.email import send_email
+
+from app.services.notification_service import send_post_notification
 
 from app.utils.subscription_limits import (
     get_active_subscription,
@@ -28,6 +29,7 @@ router = APIRouter(
 @router.post("/", response_model=LikeResponse)
 def like_post(
     post_id: int,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -88,14 +90,13 @@ def like_post(
     )
 
     if post_owner and post_owner.email != current_user.email:
-        send_email(
+        background_tasks.add_task(
+            send_post_notification,
             recipient=post_owner.email,
-            subject="New Like on Your Blog Post",
-            body=(
-                f"Hello {post_owner.username},\n\n"
-                f"{current_user.username} liked your post "
-                f'"{post.title}".\n'
-            ),
+            recipient_name=post_owner.username,
+            post_title=post.title,
+            actor_name=current_user.username,
+            activity="Liked your post",
         )
 
     return like

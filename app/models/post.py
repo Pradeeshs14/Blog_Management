@@ -14,3 +14,4 @@ class Post(Base):
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     image = Column(String(500), nullable=True)
+    views = Column(Integer, default=0, nullable=False)

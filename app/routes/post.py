@@ -164,6 +164,9 @@ def get_post(
             detail="Post not found",
         )
 
+    post.views += 1
+    db.commit()
+
     return post
 
 
