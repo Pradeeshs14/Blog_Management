@@ -103,6 +103,54 @@ Each user only receives analytics for their own posts.
 - Django admin project integrated
 - Subscription plans and billing information can be managed through the admin interface
 
+## 12.🔔 Notification Center
+
+The project includes an in-app Notification Center with a bell icon for displaying user-specific notifications.
+
+### Notification Features
+
+- Like notifications when another user likes your post
+- Comment notifications when another user comments on your post
+- Subscription activation notifications
+- Subscription renewal notifications
+- Unread notification count
+- Read/unread notification status
+- Mark individual notifications as read
+- Mark individual notifications as unread
+- Mark all notifications as read
+- Responsive notification dropdown in the dashboard
+- JWT-protected notification APIs
+
+### Notification API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/notifications/` | Get current user's notifications |
+| GET | `/notifications/unread-count` | Get unread notification count |
+| PUT | `/notifications/{notification_id}/read` | Mark notification as read |
+| PUT | `/notifications/{notification_id}/unread` | Mark notification as unread |
+| PUT | `/notifications/read-all` | Mark all notifications as read |
+
+### Notification Types
+
+- `like`
+- `comment`
+- `subscription`
+
+### Notification Screenshots
+
+Notification Center screenshots are available in the `screenshots` directory.
+
+The screenshots demonstrate:
+
+- Notification bell and dropdown
+- Like and comment notifications
+- Subscription notifications
+- Unread notification count
+- Mark as read
+- Mark as unread
+- Notification dashboard
+
 ## 12. Testing
 
 The following features were tested through Swagger/API:
@@ -120,6 +168,7 @@ The following features were tested through Swagger/API:
 - Subscription expiry
 - Dashboard analytics
 - Post view tracking
+- Notificaions 
 
 ## 13. GitHub
 
@@ -128,16 +177,4 @@ Project source code has been pushed to GitHub.
 Repository:
 `https://github.com/Pradeeshs14/Blog_Management.git`
 
-## 14. Deliverables
 
-- Functional Blog Management API
-- User authentication
-- Subscription management
-- Email notification system
-- Invoice generation
-- User dashboard
-- Data visualization
-- Post view analytics
-- Django admin
-- Dashboard screenshot
-- GitHub repository
