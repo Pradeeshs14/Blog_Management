@@ -1,5 +1,5 @@
-
 import os
+
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -11,12 +11,15 @@ from app.models.subscription import Subscription
 from app.models.subscription_plan import SubscriptionPlan
 from app.models.user import User
 from app.models.billing_history import BillingHistory
+from app.models.notification import Notification
+
 from app.schemas.subscription import (
     SubscriptionCreate,
     SubscriptionResponse,
     SubscriptionPlanResponse,
     BillingHistoryResponse,
 )
+
 from app.core.security import get_current_user
 from app.utils.invoice import generate_invoice
 from app.utils.subscription_limits import get_active_subscription
@@ -83,6 +86,16 @@ def create_subscription(
     db.commit()
     db.refresh(new_subscription)
 
+    notification = Notification(
+        user_id=current_user.id,
+        message=f"Your {plan.name} subscription has been activated successfully.",
+        notification_type="subscription",
+        is_read=False,
+    )
+
+    db.add(notification)
+    db.commit()
+
     billing_record = BillingHistory(
         user_id=current_user.id,
         plan_id=plan.id,
@@ -98,9 +111,16 @@ def create_subscription(
     db.refresh(billing_record)
 
     invoice_filename = f"invoice_{billing_record.id}.pdf"
-    invoice_dir = os.path.join("media", "invoices")
 
-    os.makedirs(invoice_dir, exist_ok=True)
+    invoice_dir = os.path.join(
+        "media",
+        "invoices",
+    )
+
+    os.makedirs(
+        invoice_dir,
+        exist_ok=True,
+    )
 
     invoice_path = os.path.join(
         invoice_dir,
@@ -131,6 +151,84 @@ def create_subscription(
         "start_date": new_subscription.start_date,
         "end_date": new_subscription.end_date,
         "is_active": new_subscription.is_active,
+    }
+
+
+@router.post("/renew", response_model=SubscriptionResponse)
+def renew_subscription(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    subscription = (
+        db.query(Subscription)
+        .filter(
+            Subscription.user_id == current_user.id,
+            Subscription.is_active == 1,
+        )
+        .first()
+    )
+
+    if not subscription:
+        raise HTTPException(
+            status_code=404,
+            detail="No active subscription found",
+        )
+
+    plan = (
+        db.query(SubscriptionPlan)
+        .filter(
+            SubscriptionPlan.id == subscription.plan_id
+        )
+        .first()
+    )
+
+    if not plan:
+        raise HTTPException(
+            status_code=404,
+            detail="Subscription plan not found",
+        )
+
+    old_end_date = subscription.end_date
+
+    new_end_date = old_end_date + timedelta(days=30)
+
+    subscription.end_date = new_end_date
+
+    billing_record = BillingHistory(
+        user_id=current_user.id,
+        plan_id=plan.id,
+        plan_name=plan.name,
+        price=plan.price,
+        start_date=old_end_date,
+        end_date=new_end_date,
+        transaction_id=f"RENEW-{subscription.id}-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}",
+    )
+
+    db.add(billing_record)
+
+    notification = Notification(
+        user_id=current_user.id,
+        message=f"Your {plan.name} subscription has been renewed successfully.",
+        notification_type="subscription",
+        is_read=False,
+    )
+
+    db.add(notification)
+
+    db.commit()
+
+    db.refresh(subscription)
+    db.refresh(billing_record)
+
+    return {
+        "id": subscription.id,
+        "user_id": subscription.user_id,
+        "plan_id": plan.id,
+        "plan_name": plan.name,
+        "price": plan.price,
+        "start_date": subscription.start_date,
+        "end_date": subscription.end_date,
+        "is_active": subscription.is_active,
     }
 
 
@@ -211,4 +309,3 @@ def download_invoice(
         media_type="application/pdf",
         filename=f"invoice_{billing_record.id}.pdf",
     )
-

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>User Dashboard</title>
+    <title>Blog Dashboard</title>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -14,81 +14,669 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg: #070a10;
+            --surface: #10141c;
+            --surface-light: #181d27;
+            --surface-hover: #202633;
+            --border: #272e3b;
+            --text: #ffffff;
+            --muted: #8f98a8;
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --purple: #a78bfa;
+            --blue: #38bdf8;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #0f1115;
-            color: #ffffff;
             margin: 0;
             padding: 30px;
+            min-height: 100vh;
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+            color: var(--text);
+
+            background:
+                radial-gradient(
+                    circle at 5% 5%,
+                    rgba(99, 102, 241, 0.15),
+                    transparent 28%
+                ),
+                radial-gradient(
+                    circle at 95% 15%,
+                    rgba(56, 189, 248, 0.10),
+                    transparent 28%
+                ),
+                radial-gradient(
+                    circle at 50% 100%,
+                    rgba(167, 139, 250, 0.07),
+                    transparent 30%
+                ),
+                var(--bg);
+
+            overflow-x: hidden;
+        }
+
+        /* =========================
+           Ambient Background
+        ========================== */
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(100px);
+            opacity: 0.12;
+            z-index: -1;
+            animation: ambientFloat 8s ease-in-out infinite alternate;
+        }
+
+        body::before {
+            top: 10%;
+            left: -150px;
+            background: var(--primary);
+        }
+
+        body::after {
+            right: -150px;
+            bottom: 10%;
+            background: var(--blue);
+            animation-delay: 2s;
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1180px;
             margin: auto;
         }
 
+        /* =========================
+           Header
+        ========================== */
+
         .header {
-            background: #181b21;
-            padding: 25px 30px;
-            border-radius: 14px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+            position: relative;
+            z-index: 10000;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(23, 27, 36, 0.96),
+                    rgba(12, 15, 22, 0.96)
+                );
+
+            border: 1px solid var(--border);
+            padding: 26px 28px;
+            border-radius: 22px;
+            margin-bottom: 28px;
+            box-shadow: var(--shadow);
+
+            animation: fadeUp 0.7s ease both;
+
+            overflow: visible;
+        }
+
+        .header::after {
+            content: "";
+            position: absolute;
+            left: 8%;
+            right: 8%;
+            bottom: -1px;
+            height: 1px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(99, 102, 241, 0.8),
+                    rgba(56, 189, 248, 0.6),
+                    transparent
+                );
+
+            opacity: 0.7;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .dashboard-logo {
+            width: 52px;
+            height: 52px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 15px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--primary),
+                    var(--purple)
+                );
+
+            font-size: 23px;
+
+            box-shadow:
+                0 10px 30px rgba(99, 102, 241, 0.35);
+
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        .header-label {
+            color: var(--primary-light);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
         }
 
         .header h1 {
-            margin: 0;
-            font-size: 32px;
+            margin: 3px 0 0;
+            font-size: 30px;
+            letter-spacing: -0.6px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #ffffff,
+                    #c7d2fe
+                );
+
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .header p {
-            margin: 8px 0 0;
-            color: #9ca3af;
+            margin: 7px 0 0;
+            color: var(--muted);
+            font-size: 14px;
         }
 
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* =========================
+           Session Button
+        ========================== */
+
+        .session-button {
+            height: 50px;
+            padding: 0 15px;
+
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            border-radius: 14px;
+            border: 1px solid var(--border);
+
+            background: var(--surface-light);
+            color: #dbe4ff;
+
+            font-size: 12px;
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.25s ease,
+                background 0.25s ease,
+                border-color 0.25s ease;
+        }
+
+        .session-button:hover {
+            transform: translateY(-2px);
+            background: var(--surface-hover);
+            border-color: #414a5b;
+        }
+
+        /* =========================
+           Notification Wrapper
+        ========================== */
+
+        .notification-wrapper {
+            position: relative;
+            z-index: 999999;
+        }
+
+        /* =========================
+           Notification Bell
+        ========================== */
+
+        .notification-bell {
+            position: relative;
+
+            width: 50px;
+            height: 50px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 15px;
+            border: 1px solid var(--border);
+
+            background: var(--surface-light);
+            color: white;
+
+            font-size: 21px;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.25s ease,
+                background 0.25s ease,
+                border-color 0.25s ease;
+        }
+
+        .notification-bell:hover {
+            transform: translateY(-2px);
+            background: var(--surface-hover);
+            border-color: #414a5b;
+        }
+
+        .notification-bell.has-notifications {
+            animation: bellPulse 2.5s infinite;
+        }
+
+        /* =========================
+           Notification Badge
+        ========================== */
+
+        .notification-badge {
+            position: absolute;
+
+            top: -7px;
+            right: -7px;
+
+            min-width: 21px;
+            height: 21px;
+
+            padding: 2px 6px;
+
+            display: none;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 20px;
+
+            background: var(--danger);
+            color: white;
+
+            font-size: 10px;
+            font-weight: 700;
+
+            border: 2px solid var(--bg);
+
+            animation: badgePop 0.3s ease;
+        }
+
+        /* =========================
+           Notification Dropdown
+        ========================== */
+
+        .notification-dropdown {
+            position: absolute;
+
+            top: 62px;
+            right: 0;
+
+            width: 390px;
+            max-width: calc(100vw - 30px);
+
+            display: none;
+
+            background:
+                rgba(16, 20, 28, 0.98);
+
+            border: 1px solid var(--border);
+            border-radius: 18px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, 0.7);
+
+            z-index: 9999999;
+
+            backdrop-filter: blur(20px);
+        }
+
+        .notification-dropdown.show {
+            display: block;
+
+            animation:
+                dropdownIn 0.25s ease both;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 17px 18px;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        .notification-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            font-size: 15px;
+        }
+
+        .notification-header button {
+            border: none;
+            background: transparent;
+
+            color: var(--primary-light);
+
+            font-size: 12px;
+
+            cursor: pointer;
+
+            transition: color 0.2s ease;
+        }
+
+        .notification-header button:hover {
+            color: white;
+        }
+
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            position: relative;
+
+            padding: 17px;
+
+            border-bottom: 1px solid var(--border);
+
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease;
+
+            animation:
+                notificationIn 0.3s ease both;
+        }
+
+        .notification-item:hover {
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .notification-item.unread {
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(99, 102, 241, 0.12),
+                    transparent
+                );
+
+            border-left: 3px solid var(--primary);
+        }
+
+        .notification-message {
+            padding-right: 5px;
+
+            font-size: 14px;
+            line-height: 1.5;
+
+            color: #f1f5f9;
+        }
+
+        .notification-time {
+            margin-top: 7px;
+
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .notification-action {
+            margin-top: 11px;
+
+            padding: 6px 10px;
+
+            border-radius: 7px;
+            border: 1px solid #343b48;
+
+            background: #1a1f28;
+            color: #a5b4fc;
+
+            font-size: 11px;
+
+            cursor: pointer;
+
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .notification-action:hover {
+            background: #252b38;
+            transform: translateY(-1px);
+        }
+
+        .no-notifications {
+            padding: 35px 20px;
+            margin: 0;
+
+            text-align: center;
+
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* =========================
+           Statistics
+        ========================== */
+
         .stats {
+            position: relative;
+            z-index: 1;
+
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
+
+            gap: 18px;
+            margin-bottom: 28px;
         }
 
         .card {
-            background: #181b21;
-            padding: 25px;
-            border-radius: 14px;
-            text-align: center;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
-            border: 1px solid #252932;
+            position: relative;
+
+            overflow: hidden;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(23, 27, 36, 0.98),
+                    rgba(12, 15, 21, 0.98)
+                );
+
+            border: 1px solid var(--border);
+
+            padding: 24px;
+
+            border-radius: 18px;
+
+            box-shadow:
+                0 15px 40px rgba(0, 0, 0, 0.25);
+
+            animation:
+                fadeUp 0.6s ease both;
+
+            transition:
+                transform 0.25s ease,
+                border-color 0.25s ease,
+                box-shadow 0.25s ease;
+        }
+
+        .card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .card:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .card:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+
+            border-color: #414a5b;
+
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .card::after {
+            content: "";
+
+            position: absolute;
+
+            width: 110px;
+            height: 110px;
+
+            right: -50px;
+            bottom: -50px;
+
+            border-radius: 50%;
+
+            background:
+                rgba(99, 102, 241, 0.08);
+
+            transition:
+                transform 0.3s ease;
+        }
+
+        .card:hover::after {
+            transform: scale(1.3);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 11px;
+
+            background: #202531;
+
+            margin-bottom: 15px;
+
+            font-size: 18px;
         }
 
         .card h2 {
             margin: 0;
+
             font-size: 34px;
+            letter-spacing: -1px;
         }
 
         .card p {
-            margin-top: 10px;
-            color: #9ca3af;
+            margin: 8px 0 0;
+
+            color: var(--muted);
+            font-size: 13px;
         }
 
+        /* =========================
+           Charts
+        ========================== */
+
         .chart-container {
-            background: #181b21;
+            position: relative;
+            z-index: 1;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(23, 27, 36, 0.98),
+                    rgba(12, 15, 21, 0.98)
+                );
+
             padding: 25px;
-            border-radius: 14px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
-            border: 1px solid #252932;
+
+            border-radius: 18px;
+
+            margin-bottom: 24px;
+
+            border: 1px solid var(--border);
+
+            box-shadow:
+                0 15px 40px rgba(0, 0, 0, 0.25);
+
+            animation:
+                fadeUp 0.7s ease both;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 20px;
         }
 
         .chart-container h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 20px;
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .chart-subtitle {
+            color: var(--muted);
+            font-size: 12px;
         }
 
         .chart-box {
             position: relative;
-            height: 350px;
+            height: 330px;
         }
 
         canvas {
@@ -96,23 +684,499 @@
             height: 100% !important;
         }
 
-        @media (max-width: 800px) {
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
+        /* =========================
+           Token Modal
+        ========================== */
+
+        .token-modal {
+            position: fixed;
+            inset: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+
+            background:
+                rgba(0, 0, 0, 0.82);
+
+            backdrop-filter: blur(14px);
+
+            z-index: 10000;
+
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+
+            transition:
+                opacity 0.25s ease,
+                visibility 0.25s ease;
+        }
+
+        .token-modal.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .token-modal-content {
+            position: relative;
+
+            width: 100%;
+            max-width: 450px;
+
+            padding: 36px;
+
+            text-align: center;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #191e28,
+                    #0d1118
+                );
+
+            border: 1px solid #343c4b;
+
+            border-radius: 24px;
+
+            box-shadow:
+                0 35px 110px rgba(0, 0, 0, 0.8);
+
+            transform:
+                translateY(25px) scale(0.95);
+
+            transition:
+                transform 0.35s
+                cubic-bezier(.2, .8, .2, 1);
+        }
+
+        .token-modal.show .token-modal-content {
+            transform:
+                translateY(0) scale(1);
+        }
+
+        .token-icon {
+            width: 67px;
+            height: 67px;
+
+            margin: 0 auto 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 19px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--primary),
+                    var(--purple)
+                );
+
+            font-size: 28px;
+
+            box-shadow:
+                0 12px 35px rgba(99, 102, 241, 0.35);
+
+            animation:
+                logoFloat 3s ease-in-out infinite;
+        }
+
+        .token-modal-content h2 {
+            margin: 0;
+            font-size: 25px;
+        }
+
+        .token-modal-content > p {
+            margin: 10px 0 22px;
+
+            color: var(--muted);
+
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .token-input-wrapper {
+            position: relative;
+        }
+
+        .token-input-wrapper input {
+            width: 100%;
+
+            padding: 15px 50px 15px 15px;
+
+            background: #080b10;
+            color: white;
+
+            border: 1px solid #303744;
+            border-radius: 11px;
+
+            outline: none;
+
+            font-size: 13px;
+
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .token-input-wrapper input:focus {
+            border-color: var(--primary);
+
+            box-shadow:
+                0 0 0 3px
+                rgba(99, 102, 241, 0.12);
+        }
+
+        #toggleToken {
+            position: absolute;
+
+            right: 12px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            border: none;
+
+            background: transparent;
+
+            color: var(--muted);
+
+            cursor: pointer;
+
+            font-size: 17px;
+        }
+
+        .token-save-button {
+            width: 100%;
+
+            margin-top: 15px;
+
+            padding: 14px;
+
+            border: none;
+            border-radius: 11px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--primary),
+                    #7c3aed
+                );
+
+            color: white;
+
+            font-size: 14px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 10px 25px
+                rgba(99, 102, 241, 0.25);
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .token-save-button:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 14px 30px
+                rgba(99, 102, 241, 0.35);
+        }
+
+        .token-save-button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+            transform: none;
+        }
+
+        .token-error {
+            min-height: 18px;
+
+            margin: 12px 0 0 !important;
+
+            color: #f87171 !important;
+
+            font-size: 12px !important;
+        }
+
+        .token-hint {
+            margin-top: 16px;
+
+            color: #697386;
+
+            font-size: 10px;
+        }
+
+        /* =========================
+           Loading
+        ========================== */
+
+        .loading {
+            opacity: 0.5;
+
+            animation:
+                loadingPulse 1.2s infinite;
+        }
+
+        /* =========================
+           Toast
+        ========================== */
+
+        .toast {
+            position: fixed;
+
+            left: 50%;
+            bottom: 25px;
+
+            transform:
+                translate(-50%, 30px);
+
+            padding: 12px 18px;
+
+            border-radius: 10px;
+
+            background: #171c25;
+
+            border: 1px solid #343c4b;
+
+            color: white;
+
+            font-size: 12px;
+
+            box-shadow:
+                0 15px 40px rgba(0, 0, 0, 0.5);
+
+            opacity: 0;
+
+            pointer-events: none;
+
+            z-index: 20000;
+
+            transition:
+                opacity 0.3s ease,
+                transform 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+
+            transform:
+                translate(-50%, 0);
+        }
+
+        /* =========================
+           Animations
+        ========================== */
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        @media (max-width: 500px) {
+        @keyframes dropdownIn {
+            from {
+                opacity: 0;
+
+                transform:
+                    translateY(-8px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+
+                transform:
+                    translateY(0) scale(1);
+            }
+        }
+
+        @keyframes notificationIn {
+            from {
+                opacity: 0;
+
+                transform:
+                    translateX(10px);
+            }
+
+            to {
+                opacity: 1;
+
+                transform:
+                    translateX(0);
+            }
+        }
+
+        @keyframes badgePop {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes bellPulse {
+            0%,
+            100% {
+                transform: rotate(0);
+            }
+
+            10% {
+                transform: rotate(8deg);
+            }
+
+            20% {
+                transform: rotate(-8deg);
+            }
+
+            30% {
+                transform: rotate(5deg);
+            }
+
+            40% {
+                transform: rotate(-5deg);
+            }
+
+            50% {
+                transform: rotate(0);
+            }
+        }
+
+        @keyframes logoFloat {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-3px);
+            }
+        }
+
+        @keyframes ambientFloat {
+            from {
+                transform: translate(0, 0);
+            }
+
+            to {
+                transform: translate(35px, -25px);
+            }
+        }
+
+        @keyframes loadingPulse {
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* =========================
+           Responsive
+        ========================== */
+
+        @media (max-width: 900px) {
+            .stats {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
             body {
                 padding: 15px;
+            }
+
+            .header {
+                padding: 22px;
+            }
+
+            .header-top {
+                align-items: flex-start;
+            }
+
+            .header-title {
+                align-items: flex-start;
+            }
+
+            .header h1 {
+                font-size: 23px;
+            }
+
+            .header p {
+                font-size: 12px;
+            }
+
+            .dashboard-logo {
+                width: 43px;
+                height: 43px;
+            }
+
+            .header-actions {
+                gap: 6px;
+            }
+
+            .session-button {
+                width: 45px;
+                height: 45px;
+
+                padding: 0;
+
+                justify-content: center;
+            }
+
+            .session-button span {
+                display: none;
+            }
+
+            .notification-bell {
+                width: 45px;
+                height: 45px;
             }
 
             .stats {
                 grid-template-columns: 1fr;
             }
 
-            .header h1 {
-                font-size: 26px;
+            .chart-container {
+                padding: 18px;
+            }
+
+            .chart-box {
+                height: 280px;
+            }
+
+            .notification-dropdown {
+                position: fixed;
+
+                top: 82px;
+                right: 15px;
+                left: 15px;
+
+                width: auto;
+                max-width: none;
+            }
+
+            .token-modal-content {
+                padding: 27px 20px;
             }
         }
     </style>
@@ -120,224 +1184,1538 @@
 
 <body>
 
-<div class="container">
+    <!-- =========================
+         JWT TOKEN MODAL
+    ========================== -->
 
-    <div class="header">
-        <h1>My Dashboard</h1>
-        <p>Track your blog performance</p>
+    <div id="tokenModal" class="token-modal">
+
+        <div class="token-modal-content">
+
+            <div class="token-icon">
+                🔐
+            </div>
+
+            <h2>Dashboard Access</h2>
+
+            <p>
+                Enter your JWT access token to securely
+                access your blog dashboard.
+            </p>
+
+            <div class="token-input-wrapper">
+
+                <input
+                    type="password"
+                    id="tokenInput"
+                    placeholder="Paste your JWT access token"
+                    autocomplete="off"
+                >
+
+                <button
+                    type="button"
+                    id="toggleToken"
+                    title="Show / Hide token"
+                >
+                    👁
+                </button>
+
+            </div>
+
+            <button
+                id="saveToken"
+                class="token-save-button"
+            >
+                Continue
+            </button>
+
+            <p
+                id="tokenError"
+                class="token-error"
+            ></p>
+
+            <div class="token-hint">
+                Your token is stored only in this browser.
+            </div>
+
+        </div>
+
     </div>
 
-    <div class="stats">
 
-        <div class="card">
-            <h2 id="totalPosts">0</h2>
-            <p>Total Posts</p>
+    <!-- =========================
+         TOAST
+    ========================== -->
+
+    <div id="toast" class="toast"></div>
+
+
+    <div class="container">
+
+        <!-- =========================
+             HEADER
+        ========================== -->
+
+        <div class="header">
+
+            <div class="header-top">
+
+                <div class="header-title">
+
+                    <div class="dashboard-logo">
+                        ✍️
+                    </div>
+
+                    <div>
+
+                        <div class="header-label">
+                            Blog Analytics
+                        </div>
+
+                        <h1>
+                            My Dashboard
+                        </h1>
+
+                        <p>
+                            Track your blog performance
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="header-actions">
+
+                    <!-- Access Token -->
+
+                    <button
+                        id="sessionButton"
+                        class="session-button"
+                        title="Manage access token"
+                    >
+                        🔐
+                        <span>Access Token</span>
+                    </button>
+
+
+                    <!-- Notification -->
+
+                    <div class="notification-wrapper">
+
+                        <button
+                            id="notificationBell"
+                            class="notification-bell"
+                            title="Notifications"
+                        >
+                            🔔
+
+                            <span
+                                id="notificationBadge"
+                                class="notification-badge"
+                            >
+                                0
+                            </span>
+
+                        </button>
+
+
+                        <div
+                            id="notificationDropdown"
+                            class="notification-dropdown"
+                        >
+
+                            <div class="notification-header">
+
+                                <div class="notification-title">
+
+                                    🔔
+
+                                    <strong>
+                                        Notifications
+                                    </strong>
+
+                                </div>
+
+                                <button
+                                    id="markAllRead"
+                                >
+                                    Mark all as read
+                                </button>
+
+                            </div>
+
+
+                            <div
+                                id="notificationList"
+                                class="notification-list"
+                            >
+
+                                <p class="no-notifications">
+                                    No notifications
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="card">
-            <h2 id="totalComments">0</h2>
-            <p>Comments Made</p>
+
+        <!-- =========================
+             STATISTICS
+        ========================== -->
+
+        <div class="stats">
+
+            <div class="card">
+
+                <div class="card-icon">
+                    📝
+                </div>
+
+                <h2 id="totalPosts">
+                    0
+                </h2>
+
+                <p>
+                    Total Posts
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-icon">
+                    💬
+                </div>
+
+                <h2 id="totalComments">
+                    0
+                </h2>
+
+                <p>
+                    Comments Made
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-icon">
+                    ❤️
+                </div>
+
+                <h2 id="totalLikes">
+                    0
+                </h2>
+
+                <p>
+                    Likes Received
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-icon">
+                    👁
+                </div>
+
+                <h2 id="totalViews">
+                    0
+                </h2>
+
+                <p>
+                    Total Views
+                </p>
+
+            </div>
+
         </div>
 
-        <div class="card">
-            <h2 id="totalLikes">0</h2>
-            <p>Likes Received</p>
+
+        <!-- =========================
+             LIKES CHART
+        ========================== -->
+
+        <div class="chart-container">
+
+            <div class="chart-header">
+
+                <h2>
+                    Likes per Post
+                </h2>
+
+                <span class="chart-subtitle">
+                    Post engagement
+                </span>
+
+            </div>
+
+            <div class="chart-box">
+
+                <canvas id="likesChart"></canvas>
+
+            </div>
+
         </div>
 
-        <div class="card">
-            <h2 id="totalViews">0</h2>
-            <p>Total Views</p>
+
+        <!-- =========================
+             COMMENTS CHART
+        ========================== -->
+
+        <div class="chart-container">
+
+            <div class="chart-header">
+
+                <h2>
+                    Comments per Post
+                </h2>
+
+                <span class="chart-subtitle">
+                    Audience interaction
+                </span>
+
+            </div>
+
+            <div class="chart-box">
+
+                <canvas id="commentsChart"></canvas>
+
+            </div>
+
         </div>
 
     </div>
 
-    <div class="chart-container">
 
-        <h2>Likes per Post</h2>
+    <script>
 
-        <div class="chart-box">
-            <canvas id="likesChart"></canvas>
-        </div>
+        /* =========================
+           Authentication
+        ========================== */
 
-    </div>
+        let token =
+            localStorage.getItem("access_token");
 
-    <div class="chart-container">
+        let likesChartInstance = null;
+        let commentsChartInstance = null;
 
-        <h2>Comments per Post</h2>
 
-        <div class="chart-box">
-            <canvas id="commentsChart"></canvas>
-        </div>
+        const tokenModal =
+            document.getElementById(
+                "tokenModal"
+            );
 
-    </div>
+        const tokenInput =
+            document.getElementById(
+                "tokenInput"
+            );
 
-</div>
+        const tokenError =
+            document.getElementById(
+                "tokenError"
+            );
 
-<script>
+        const saveTokenButton =
+            document.getElementById(
+                "saveToken"
+            );
 
-    let token = localStorage.getItem("access_token");
 
-    if (!token) {
+        /* =========================
+           Toast
+        ========================== */
 
-        token = prompt("Paste your JWT access token:");
+        function showToast(message) {
 
-        if (token) {
-            localStorage.setItem("access_token", token);
+            const toast =
+                document.getElementById(
+                    "toast"
+                );
+
+            toast.textContent = message;
+
+            toast.classList.add("show");
+
+            setTimeout(() => {
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            }, 2500);
         }
-    }
 
-    async function loadDashboard() {
 
-        try {
+        /* =========================
+           Token Popup
+        ========================== */
 
-            const response = await fetch("/user/dashboard/", {
-                headers: {
-                    "Authorization": `Bearer ${token}`
+        function showTokenPopup(message = "") {
+
+            tokenError.textContent =
+                message;
+
+            tokenModal.classList.add(
+                "show"
+            );
+
+            setTimeout(() => {
+
+                tokenInput.focus();
+
+            }, 150);
+        }
+
+
+        function hideTokenPopup() {
+
+            tokenModal.classList.remove(
+                "show"
+            );
+        }
+
+
+        function handleUnauthorized() {
+
+            localStorage.removeItem(
+                "access_token"
+            );
+
+            token = null;
+
+            tokenInput.value = "";
+
+            notificationDropdown.classList.remove(
+                "show"
+            );
+
+            showTokenPopup(
+                "Your access token has expired or is invalid. Please enter a new token."
+            );
+        }
+
+
+        /* =========================
+           Show Token Popup If Needed
+        ========================== */
+
+        if (!token) {
+
+            showTokenPopup();
+
+        }
+
+
+        /* =========================
+           Token Visibility
+        ========================== */
+
+        document
+            .getElementById("toggleToken")
+            .addEventListener(
+                "click",
+                () => {
+
+                    tokenInput.type =
+                        tokenInput.type === "password"
+                            ? "text"
+                            : "password";
+
                 }
-            });
+            );
 
-            if (!response.ok) {
-                throw new Error("Failed to load dashboard");
+
+        /* =========================
+           Save Token
+        ========================== */
+
+        async function saveToken() {
+
+            const enteredToken =
+                tokenInput.value.trim();
+
+            if (!enteredToken) {
+
+                tokenError.textContent =
+                    "Please enter your access token.";
+
+                return;
             }
 
-            const data = await response.json();
 
-            document.getElementById("totalPosts").textContent =
-                data.total_posts;
+            saveTokenButton.disabled =
+                true;
 
-            document.getElementById("totalComments").textContent =
-                data.total_comments;
-
-            document.getElementById("totalLikes").textContent =
-                data.total_likes_received;
-
-            document.getElementById("totalViews").textContent =
-                data.total_views;
+            saveTokenButton.textContent =
+                "Checking token...";
 
 
-            const postTitles =
-                data.posts.map(post => post.title);
+            try {
 
-            const likes =
-                data.posts.map(post => post.likes);
-
-            const comments =
-                data.posts.map(post => post.comments);
-
-
-            new Chart(
-                document.getElementById("likesChart"),
-                {
-                    type: "bar",
-
-                    data: {
-                        labels: postTitles,
-
-                        datasets: [{
-                            label: "Likes",
-                            data: likes,
-                            borderWidth: 1
-                        }]
-                    },
-
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-
-                        plugins: {
-                            legend: {
-                                labels: {
-                                    color: "#ffffff"
-                                }
-                            }
-                        },
-
-                        scales: {
-                            x: {
-                                ticks: {
-                                    color: "#9ca3af"
-                                },
-                                grid: {
-                                    color: "#252932"
-                                }
-                            },
-
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    color: "#9ca3af"
-                                },
-                                grid: {
-                                    color: "#252932"
-                                }
+                const response =
+                    await fetch(
+                        "/user/dashboard/",
+                        {
+                            headers: {
+                                "Authorization":
+                                    `Bearer ${enteredToken}`
                             }
                         }
+                    );
+
+
+                if (!response.ok) {
+
+                    if (
+                        response.status === 401
+                    ) {
+
+                        throw new Error(
+                            "Invalid or expired access token."
+                        );
                     }
+
+                    throw new Error(
+                        "Unable to verify the access token."
+                    );
+                }
+
+
+                localStorage.setItem(
+                    "access_token",
+                    enteredToken
+                );
+
+                token =
+                    enteredToken;
+
+                tokenError.textContent =
+                    "";
+
+                hideTokenPopup();
+
+                showToast(
+                    "Access token verified successfully."
+                );
+
+
+                await loadDashboard();
+                await loadNotifications();
+                await loadUnreadCount();
+
+
+            } catch (error) {
+
+                tokenError.textContent =
+                    error.message ||
+                    "Invalid access token.";
+
+            } finally {
+
+                saveTokenButton.disabled =
+                    false;
+
+                saveTokenButton.textContent =
+                    "Continue";
+            }
+        }
+
+
+        document
+            .getElementById("saveToken")
+            .addEventListener(
+                "click",
+                saveToken
+            );
+
+
+        /* =========================
+           Enter Key For Token
+        ========================== */
+
+        tokenInput.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    saveToken();
+
+                }
+
+            }
+        );
+
+
+        /* =========================
+           Session Button
+        ========================== */
+
+        document
+            .getElementById(
+                "sessionButton"
+            )
+            .addEventListener(
+                "click",
+                () => {
+
+                    tokenInput.value =
+                        token || "";
+
+                    tokenError.textContent =
+                        "";
+
+                    showTokenPopup();
+
                 }
             );
 
 
-            new Chart(
-                document.getElementById("commentsChart"),
-                {
-                    type: "bar",
+        /* =========================
+           Dashboard
+        ========================== */
 
-                    data: {
-                        labels: postTitles,
+        async function loadDashboard() {
 
-                        datasets: [{
-                            label: "Comments",
-                            data: comments,
-                            borderWidth: 1
-                        }]
-                    },
+            if (!token) {
+                return;
+            }
 
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
 
-                        plugins: {
-                            legend: {
-                                labels: {
-                                    color: "#ffffff"
-                                }
+            try {
+
+                const response =
+                    await fetch(
+                        "/user/dashboard/",
+                        {
+                            headers: {
+                                "Authorization":
+                                    `Bearer ${token}`
                             }
-                        },
+                        }
+                    );
 
-                        scales: {
-                            x: {
-                                ticks: {
-                                    color: "#9ca3af"
-                                },
-                                grid: {
-                                    color: "#252932"
-                                }
+
+                if (
+                    response.status === 401
+                ) {
+
+                    handleUnauthorized();
+
+                    return;
+                }
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Failed to load dashboard"
+                    );
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                animateNumber(
+                    document.getElementById(
+                        "totalPosts"
+                    ),
+                    data.total_posts
+                );
+
+
+                animateNumber(
+                    document.getElementById(
+                        "totalComments"
+                    ),
+                    data.total_comments
+                );
+
+
+                animateNumber(
+                    document.getElementById(
+                        "totalLikes"
+                    ),
+                    data.total_likes_received
+                );
+
+
+                animateNumber(
+                    document.getElementById(
+                        "totalViews"
+                    ),
+                    data.total_views
+                );
+
+
+                const postTitles =
+                    data.posts.map(
+                        post => post.title
+                    );
+
+
+                const likes =
+                    data.posts.map(
+                        post => post.likes
+                    );
+
+
+                const comments =
+                    data.posts.map(
+                        post => post.comments
+                    );
+
+
+                /* =========================
+                   Destroy Previous Charts
+                ========================== */
+
+                if (likesChartInstance) {
+
+                    likesChartInstance.destroy();
+
+                }
+
+
+                if (commentsChartInstance) {
+
+                    commentsChartInstance.destroy();
+
+                }
+
+
+                /* =========================
+                   Likes Chart
+                ========================== */
+
+                likesChartInstance =
+                    new Chart(
+                        document.getElementById(
+                            "likesChart"
+                        ),
+                        {
+
+                            type: "bar",
+
+                            data: {
+
+                                labels:
+                                    postTitles,
+
+                                datasets: [
+
+                                    {
+
+                                        label:
+                                            "Likes",
+
+                                        data:
+                                            likes,
+
+                                        borderWidth:
+                                            0,
+
+                                        borderRadius:
+                                            8,
+
+                                        backgroundColor:
+                                            "rgba(99, 102, 241, 0.75)",
+
+                                        hoverBackgroundColor:
+                                            "rgba(129, 140, 248, 0.9)"
+                                    }
+
+                                ]
                             },
 
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    color: "#9ca3af"
+
+                            options: {
+
+                                responsive: true,
+
+                                maintainAspectRatio:
+                                    false,
+
+                                animation: {
+
+                                    duration:
+                                        1000,
+
+                                    easing:
+                                        "easeOutQuart"
                                 },
-                                grid: {
-                                    color: "#252932"
+
+
+                                plugins: {
+
+                                    legend: {
+
+                                        labels: {
+
+                                            color:
+                                                "#ffffff"
+                                        }
+                                    }
+                                },
+
+
+                                scales: {
+
+                                    x: {
+
+                                        ticks: {
+
+                                            color:
+                                                "#8f98a8"
+                                        },
+
+                                        grid: {
+
+                                            color:
+                                                "rgba(255,255,255,0.04)"
+                                        }
+                                    },
+
+
+                                    y: {
+
+                                        beginAtZero:
+                                            true,
+
+                                        ticks: {
+
+                                            color:
+                                                "#8f98a8"
+                                        },
+
+                                        grid: {
+
+                                            color:
+                                                "rgba(255,255,255,0.04)"
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
+                    );
+
+
+                /* =========================
+                   Comments Chart
+                ========================== */
+
+                commentsChartInstance =
+                    new Chart(
+                        document.getElementById(
+                            "commentsChart"
+                        ),
+                        {
+
+                            type: "bar",
+
+                            data: {
+
+                                labels:
+                                    postTitles,
+
+                                datasets: [
+
+                                    {
+
+                                        label:
+                                            "Comments",
+
+                                        data:
+                                            comments,
+
+                                        borderWidth:
+                                            0,
+
+                                        borderRadius:
+                                            8,
+
+                                        backgroundColor:
+                                            "rgba(56, 189, 248, 0.7)",
+
+                                        hoverBackgroundColor:
+                                            "rgba(125, 211, 252, 0.9)"
+                                    }
+
+                                ]
+                            },
+
+
+                            options: {
+
+                                responsive: true,
+
+                                maintainAspectRatio:
+                                    false,
+
+                                animation: {
+
+                                    duration:
+                                        1000,
+
+                                    easing:
+                                        "easeOutQuart"
+                                },
+
+
+                                plugins: {
+
+                                    legend: {
+
+                                        labels: {
+
+                                            color:
+                                                "#ffffff"
+                                        }
+                                    }
+                                },
+
+
+                                scales: {
+
+                                    x: {
+
+                                        ticks: {
+
+                                            color:
+                                                "#8f98a8"
+                                        },
+
+                                        grid: {
+
+                                            color:
+                                                "rgba(255,255,255,0.04)"
+                                        }
+                                    },
+
+
+                                    y: {
+
+                                        beginAtZero:
+                                            true,
+
+                                        ticks: {
+
+                                            color:
+                                                "#8f98a8"
+                                        },
+
+                                        grid: {
+
+                                            color:
+                                                "rgba(255,255,255,0.04)"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Dashboard error:",
+                    error
+                );
+            }
+        }
+
+
+        /* =========================
+           Animated Numbers
+        ========================== */
+
+        function animateNumber(
+            element,
+            target
+        ) {
+
+            const finalValue =
+                Number(target) || 0;
+
+            const duration =
+                900;
+
+            const startTime =
+                performance.now();
+
+
+            function update(currentTime) {
+
+                const progress =
+                    Math.min(
+                        (currentTime - startTime)
+                        / duration,
+                        1
+                    );
+
+
+                const eased =
+                    1 -
+                    Math.pow(
+                        1 - progress,
+                        3
+                    );
+
+
+                element.textContent =
+                    Math.round(
+                        finalValue * eased
+                    );
+
+
+                if (progress < 1) {
+
+                    requestAnimationFrame(
+                        update
+                    );
                 }
+            }
+
+
+            requestAnimationFrame(
+                update
+            );
+        }
+
+
+        /* =========================
+           Notification Elements
+        ========================== */
+
+        const notificationBell =
+            document.getElementById(
+                "notificationBell"
             );
 
-        } catch (error) {
+        const notificationDropdown =
+            document.getElementById(
+                "notificationDropdown"
+            );
 
-            console.error("Dashboard error:", error);
+        const notificationBadge =
+            document.getElementById(
+                "notificationBadge"
+            );
+
+        const notificationList =
+            document.getElementById(
+                "notificationList"
+            );
+
+        const markAllRead =
+            document.getElementById(
+                "markAllRead"
+            );
+
+
+        /* =========================
+           Load Notifications
+        ========================== */
+
+        async function loadNotifications() {
+
+            if (!token) {
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/notifications/",
+                        {
+                            headers: {
+                                "Authorization":
+                                    `Bearer ${token}`
+                            }
+                        }
+                    );
+
+
+                if (
+                    response.status === 401
+                ) {
+
+                    handleUnauthorized();
+
+                    return;
+                }
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Failed to load notifications"
+                    );
+                }
+
+
+                const notifications =
+                    await response.json();
+
+
+                notificationList.innerHTML =
+                    "";
+
+
+                if (
+                    notifications.length === 0
+                ) {
+
+                    const empty =
+                        document.createElement(
+                            "p"
+                        );
+
+                    empty.className =
+                        "no-notifications";
+
+                    empty.textContent =
+                        "🎉 You're all caught up!";
+
+                    notificationList.appendChild(
+                        empty
+                    );
+
+                    return;
+                }
+
+
+                notifications.forEach(
+                    (notification, index) => {
+
+                        const item =
+                            document.createElement(
+                                "div"
+                            );
+
+
+                        item.className =
+                            "notification-item" +
+                            (
+                                notification.is_read
+                                    ? ""
+                                    : " unread"
+                            );
+
+
+                        item.style.animationDelay =
+                            `${index * 0.04}s`;
+
+
+                        /* Message */
+
+                        const message =
+                            document.createElement(
+                                "div"
+                            );
+
+                        message.className =
+                            "notification-message";
+
+                        message.textContent =
+                            notification.message;
+
+
+                        /* Time */
+
+                        const time =
+                            document.createElement(
+                                "div"
+                            );
+
+                        time.className =
+                            "notification-time";
+
+                        time.textContent =
+                            new Date(
+                                notification.created_at
+                            ).toLocaleString();
+
+
+                        /* Action */
+
+                        const actionButton =
+                            document.createElement(
+                                "button"
+                            );
+
+                        actionButton.className =
+                            "notification-action";
+
+                        actionButton.textContent =
+                            notification.is_read
+                                ? "Mark as unread"
+                                : "Mark as read";
+
+
+                        actionButton.addEventListener(
+                            "click",
+                            async event => {
+
+                                event.stopPropagation();
+
+
+                                const endpoint =
+                                    notification.is_read
+                                        ? `/notifications/${notification.id}/unread`
+                                        : `/notifications/${notification.id}/read`;
+
+
+                                try {
+
+                                    const response =
+                                        await fetch(
+                                            endpoint,
+                                            {
+                                                method:
+                                                    "PUT",
+
+                                                headers: {
+                                                    "Authorization":
+                                                        `Bearer ${token}`
+                                                }
+                                            }
+                                        );
+
+
+                                    if (
+                                        response.status ===
+                                        401
+                                    ) {
+
+                                        handleUnauthorized();
+
+                                        return;
+                                    }
+
+
+                                    if (
+                                        !response.ok
+                                    ) {
+
+                                        throw new Error(
+                                            "Failed to update notification"
+                                        );
+                                    }
+
+
+                                    await loadNotifications();
+
+                                    await loadUnreadCount();
+
+
+                                } catch (error) {
+
+                                    console.error(
+                                        "Notification update error:",
+                                        error
+                                    );
+                                }
+                            }
+                        );
+
+
+                        item.appendChild(
+                            message
+                        );
+
+                        item.appendChild(
+                            time
+                        );
+
+                        item.appendChild(
+                            actionButton
+                        );
+
+
+                        notificationList.appendChild(
+                            item
+                        );
+
+                    }
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Notification error:",
+                    error
+                );
+            }
+        }
+
+
+        /* =========================
+           Unread Count
+        ========================== */
+
+        async function loadUnreadCount() {
+
+            if (!token) {
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/notifications/unread-count",
+                        {
+                            headers: {
+                                "Authorization":
+                                    `Bearer ${token}`
+                            }
+                        }
+                    );
+
+
+                if (
+                    response.status === 401
+                ) {
+
+                    handleUnauthorized();
+
+                    return;
+                }
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Failed to load unread count"
+                    );
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    data.unread_count > 0
+                ) {
+
+                    notificationBadge.textContent =
+                        data.unread_count;
+
+                    notificationBadge.style.display =
+                        "flex";
+
+                    notificationBell.classList.add(
+                        "has-notifications"
+                    );
+
+                } else {
+
+                    notificationBadge.style.display =
+                        "none";
+
+                    notificationBell.classList.remove(
+                        "has-notifications"
+                    );
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "Unread count error:",
+                    error
+                );
+            }
+        }
+
+
+        /* =========================
+           Notification Bell
+        ========================== */
+
+        notificationBell.addEventListener(
+            "click",
+            async event => {
+
+                event.stopPropagation();
+
+
+                notificationDropdown.classList.toggle(
+                    "show"
+                );
+
+
+                if (
+                    notificationDropdown.classList.contains(
+                        "show"
+                    )
+                ) {
+
+                    await loadNotifications();
+
+                }
+
+            }
+        );
+
+
+        /* =========================
+           Mark All Read
+        ========================== */
+
+        markAllRead.addEventListener(
+            "click",
+            async event => {
+
+                event.stopPropagation();
+
+
+                if (!token) {
+                    return;
+                }
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/notifications/read-all",
+                            {
+                                method:
+                                    "PUT",
+
+                                headers: {
+                                    "Authorization":
+                                        `Bearer ${token}`
+                                }
+                            }
+                        );
+
+
+                    if (
+                        response.status === 401
+                    ) {
+
+                        handleUnauthorized();
+
+                        return;
+                    }
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            "Failed to mark notifications as read"
+                        );
+                    }
+
+
+                    await loadNotifications();
+
+                    await loadUnreadCount();
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Mark all read error:",
+                        error
+                    );
+                }
+            }
+        );
+
+
+        /* =========================
+           Close Notification Dropdown
+        ========================== */
+
+        document.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    !event.target.closest(
+                        ".notification-wrapper"
+                    )
+                ) {
+
+                    notificationDropdown.classList.remove(
+                        "show"
+                    );
+                }
+
+            }
+        );
+
+
+        /* =========================
+           Escape Key
+        ========================== */
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Escape"
+                ) {
+
+                    notificationDropdown.classList.remove(
+                        "show"
+                    );
+
+
+                    if (token) {
+
+                        hideTokenPopup();
+
+                    }
+                }
+
+            }
+        );
+
+
+        /* =========================
+           Initial Dashboard Load
+        ========================== */
+
+        if (token) {
+
+            loadDashboard();
+
+            loadNotifications();
+
+            loadUnreadCount();
 
         }
-    }
 
-    loadDashboard();
-
-</script>
+    </script>
 
 </body>
 

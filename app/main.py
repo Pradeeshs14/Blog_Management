@@ -6,7 +6,7 @@ load_dotenv()
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from app.database import Base, engine
-from app.models import User, Post, Comment, Like
+from app.models import User, Post, Comment, Like, Notification
 
 from app.routes.auth import router as auth_router
 from app.routes.post import router as post_router
@@ -14,6 +14,7 @@ from app.routes.comment import router as comment_router
 from app.routes.like import router as like_router
 from app.routes.subscription import router as subscription_router
 from app.routes.dashboard import router as dashboard_router
+from app.routes.notification import router as notification_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -30,6 +31,7 @@ app.include_router(comment_router)
 app.include_router(like_router)
 app.include_router(subscription_router)
 app.include_router(dashboard_router)
+app.include_router(notification_router)
 
 
 @app.get("/dashboard")

@@ -12,6 +12,8 @@ from app.schemas.comment import CommentCreate, CommentResponse
 
 from app.core.security import get_current_user
 
+from app.models.notification import Notification
+
 from app.services.notification_service import send_post_notification
 
 from app.utils.subscription_limits import (
@@ -69,6 +71,17 @@ def create_comment(
     db.add(comment)
     db.commit()
     db.refresh(comment)
+
+    if post.author_id != current_user.id:
+        notification = Notification(
+        user_id=post.author_id,
+        message=f"{current_user.username} commented on your post '{post.title}'",
+        notification_type="comment",
+        is_read=False,
+    )
+
+    db.add(notification)
+    db.commit()
 
     post_owner = (
         db.query(User)
