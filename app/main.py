@@ -15,6 +15,7 @@ from app.routes.like import router as like_router
 from app.routes.subscription import router as subscription_router
 from app.routes.dashboard import router as dashboard_router
 from app.routes.notification import router as notification_router
+from app.routes.ai_support import router as ai_support_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -32,7 +33,7 @@ app.include_router(like_router)
 app.include_router(subscription_router)
 app.include_router(dashboard_router)
 app.include_router(notification_router)
-
+app.include_router(ai_support_router)
 
 @app.get("/dashboard")
 def dashboard():
