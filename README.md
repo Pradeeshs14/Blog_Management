@@ -1,50 +1,456 @@
-# Blog Management API — Complete Project Update
+# Blog Management API
 
-## 1. Project Setup
+A full-featured Blog Management API built using **FastAPI, SQLite, SQLAlchemy, JWT authentication, Auth0, Django Admin, Chart.js, and a responsive dashboard**.
+
+The project provides blog management, comments, likes, subscriptions, billing, notifications, AI support, analytics, and multiple authentication methods.
+
+---
+
+# 1. Project Setup
 
 * FastAPI backend created
 * SQLite database configured
-* Project structure organized into models, schemas, routes, services, and utilities
+* SQLAlchemy ORM implemented
+* Project structure organized into:
+
+  * Models
+  * Schemas
+  * Routes
+  * Services
+  * Utilities
 * Swagger API documentation available
+* Responsive web dashboard implemented
 
-## 2. Authentication
+---
 
-* User registration and login completed
-* Password hashing using bcrypt
-* JWT authentication implemented
-* Protected APIs tested through Swagger
+# 2. Authentication
 
-## 3. Blog Posts
+The application supports multiple authentication methods.
+
+### Authentication Methods
+
+* Email and password signup
+* Email and password login
+* JWT authentication
+* Google login through Auth0
+* Facebook login through Auth0
+* Auth0 session handling
+* Logout functionality
+* Protected API authentication
+
+### Password Security
+
+* Passwords are hashed using bcrypt
+* Passwords are never stored as plain text
+* JWT access tokens are generated after successful authentication
+
+---
+
+# 3. 🔐 Auth0 & Social Authentication
+
+Auth0 is integrated to provide social authentication through Google and Facebook.
+
+### Auth0 Application
+
+Application name:
+
+```text
+Blog Management Api
+```
+
+Auth0 domain:
+
+```text
+dev-mugvz3kei4finwuy.us.auth0.com
+```
+
+### Social Connections
+
+Google:
+
+```text
+google-oauth2
+```
+
+Facebook:
+
+```text
+facebook-custom
+```
+
+### Auth0 Callback URL
+
+For local development:
+
+```text
+http://127.0.0.1:8000/auth/callback/
+```
+
+### Allowed Web Origins
+
+```text
+http://127.0.0.1:8000
+```
+
+### Allowed Logout URL
+
+```text
+http://127.0.0.1:8000/
+```
+
+### Auth0 Environment Variables
+
+The following configuration is stored in `.env`:
+
+```env
+AUTH0_DOMAIN=
+AUTH0_CLIENT_ID=
+AUTH0_CLIENT_SECRET=
+AUTH0_CALLBACK_URL=http://127.0.0.1:8000/auth/callback/
+```
+
+> Never commit `AUTH0_CLIENT_SECRET` or other sensitive credentials to GitHub.
+
+---
+
+# 4. Authentication API Endpoints
+
+| Method | Endpoint                | Description                       |
+| ------ | ----------------------- | --------------------------------- |
+| POST   | `/auth/register`        | Register using email and password |
+| POST   | `/auth/login`           | Login using email and password    |
+| GET    | `/auth/signup/`         | Start Auth0 signup                |
+| GET    | `/auth/login/google/`   | Login using Google                |
+| GET    | `/auth/login/facebook/` | Login using Facebook              |
+| GET    | `/auth/callback/`       | Auth0 callback                    |
+| GET    | `/auth/session/`        | Retrieve Auth0 session token      |
+
+---
+
+# 5. Email Registration
+
+Users can create an account using their name, email address, and password.
+
+### Endpoint
+
+```text
+POST /auth/register
+```
+
+### Example Request
+
+```json
+{
+  "name": "Test User",
+  "email": "testuser@example.com",
+  "password": "Test@123"
+}
+```
+
+### Registration Process
+
+```text
+User
+ ↓
+Enter Name + Email + Password
+ ↓
+Validate Request
+ ↓
+Check Existing Email
+ ↓
+Hash Password
+ ↓
+Create User
+ ↓
+Generate JWT
+ ↓
+Dashboard
+```
+
+The email authentication provider is stored as:
+
+```text
+provider = email
+```
+
+---
+
+# 6. Email Login
+
+Registered users can log in using their email address and password.
+
+### Endpoint
+
+```text
+POST /auth/login
+```
+
+### Example Request
+
+```json
+{
+  "email": "testuser@example.com",
+  "password": "Test@123"
+}
+```
+
+### Login Process
+
+```text
+Email + Password
+ ↓
+Find User
+ ↓
+Verify Password
+ ↓
+Generate JWT
+ ↓
+Dashboard
+```
+
+Invalid credentials return:
+
+```text
+Invalid email or password
+```
+
+---
+
+# 7. Google Login
+
+Google authentication is handled through Auth0.
+
+### Endpoint
+
+```text
+GET /auth/login/google/
+```
+
+### Google Login Flow
+
+```text
+Dashboard
+ ↓
+Google Login
+ ↓
+Auth0
+ ↓
+Google Authentication
+ ↓
+Auth0 Callback
+ ↓
+Create / Update Local User
+ ↓
+Generate Local JWT
+ ↓
+Dashboard
+```
+
+The Google provider is stored as:
+
+```text
+provider = google
+```
+
+---
+
+# 8. Facebook Login
+
+Facebook authentication is handled through Auth0.
+
+### Endpoint
+
+```text
+GET /auth/login/facebook/
+```
+
+### Facebook Login Flow
+
+```text
+Dashboard
+ ↓
+Facebook Login
+ ↓
+Auth0
+ ↓
+Facebook Authentication
+ ↓
+Auth0 Callback
+ ↓
+Create / Update Local User
+ ↓
+Generate Local JWT
+ ↓
+Dashboard
+```
+
+The Facebook provider is stored as:
+
+```text
+provider = facebook
+```
+
+---
+
+# 9. Auth0 Callback
+
+The Auth0 callback endpoint is:
+
+```text
+GET /auth/callback/
+```
+
+The callback performs the following operations:
+
+1. Receives the authorization code.
+2. Validates Auth0 errors.
+3. Exchanges the authorization code for an Auth0 access token.
+4. Retrieves user information from Auth0.
+5. Identifies the authentication provider.
+6. Checks whether the user already exists.
+7. Creates a new local user when required.
+8. Updates an existing user's Auth0 information.
+9. Generates a local JWT.
+10. Stores the JWT in the application session.
+11. Redirects the user to the dashboard.
+
+### Auth0 User Data
+
+The application stores:
+
+```text
+auth0_id
+provider
+email
+name
+username
+```
+
+---
+
+# 10. User Model
+
+The `users` table contains:
+
+```text
+id
+username
+email
+password
+name
+provider
+auth0_id
+```
+
+### Provider Values
+
+```text
+email
+google
+facebook
+```
+
+The `auth0_id` field stores the unique Auth0 identity for social-login users.
+
+---
+
+# 11. Authentication UI
+
+The dashboard authentication interface provides:
+
+* Email/password sign in
+* JWT access-token login
+* Email signup
+* Google login
+* Facebook login
+* Logout
+* Authentication error messages
+* Responsive authentication interface
+* Token management
+
+---
+
+# 12. Logout
+
+The dashboard includes a logout button.
+
+When logout is selected:
+
+1. The active session is cleaned up.
+2. The JWT is removed from browser storage.
+3. The local authentication token is cleared.
+4. The user is returned to the dashboard login screen.
+
+---
+
+# 13. Authentication Error Handling
+
+The authentication system handles the following errors:
+
+* Invalid email/password
+* Existing email during registration
+* Missing Auth0 authorization code
+* Auth0 authentication failure
+* Auth0 token exchange failure
+* Missing Auth0 access token
+* Missing Auth0 user ID
+* Invalid social login provider
+* Authentication session unavailable
+
+---
+
+# 14. Blog Posts
+
+The Blog Management API provides complete post management.
+
+### Features
 
 * Create posts
 * View posts
 * Update posts
 * Delete posts
 * View user's own posts
-* Post ownership validation implemented
-* Image support implemented
+* Post ownership validation
+* Image support
+* Post view tracking
 
-## 4. Comments
+---
+
+# 15. Comments
+
+### Features
 
 * Add comments to posts
 * View comments
-* Comment validation implemented
-* Email notification sent to the post owner when a comment is added
+* Comment validation
+* Ownership-related validation
+* Email notification to the post owner when a comment is added
+* In-app comment notifications
 
-## 5. Likes
+---
+
+# 16. Likes
+
+### Features
 
 * Like posts
 * Unlike posts
 * Duplicate like prevention
-* Email notification sent to the post owner when a post is liked
+* Like validation
+* Email notification to the post owner
+* In-app like notifications
 
-## 6. Subscription System
+---
+
+# 17. Subscription System
 
 Three subscription plans are implemented:
 
-* Basic — ₹99
-* Premium — ₹199
-* Pro — ₹299
+| Plan    | Price |
+| ------- | ----: |
+| Basic   |   ₹99 |
+| Premium |  ₹199 |
+| Pro     |  ₹299 |
 
 ### Subscription Features
 
@@ -59,7 +465,9 @@ Three subscription plans are implemented:
 * Billing history
 * Invoice PDF generation
 
-### Subscription API Endpoints
+---
+
+# 18. Subscription API Endpoints
 
 | Method | Endpoint                                              | Description                      |
 | ------ | ----------------------------------------------------- | -------------------------------- |
@@ -70,77 +478,49 @@ Three subscription plans are implemented:
 | GET    | `/subscriptions/billing-history`                      | Get billing history              |
 | GET    | `/subscriptions/billing-history/{billing_id}/invoice` | Generate/view invoice            |
 
-## 7. Email Notification System
+---
 
-* SMTP email configuration implemented
+# 19. Email Notification System
+
+SMTP-based email notifications are implemented.
+
+### Notifications
+
 * Comment notifications
 * Like notifications
 * Email testing completed successfully
 
-## 8. Dashboard & Analytics
+---
 
-User dashboard implemented with JWT authentication.
+# 20. 🔔 Notification Center
 
-### Dashboard Statistics
-
-* Total posts
-* Comments made
-* Likes received
-* Total post views
-
-### Analytics Charts
-
-Interactive charts implemented using Chart.js:
-
-* Likes per post
-* Comments per post
-
-Each user only receives analytics related to their own posts.
-
-## 9. Post View Tracking
-
-* `views` field added to the Post model
-* Post views are tracked
-* Each post view increments the view count
-* Total views displayed on the dashboard
-
-## 10. Dashboard UI
-
-* Responsive dashboard created
-* Dark-mode interface
-* Statistics cards
-* Interactive Chart.js graphs
-* JWT-based API data loading
-* Mobile-responsive layout
-* Access Token management interface
-* Toast notifications
-* Responsive dashboard components
-
-## 11. Django Admin
-
-* Django admin project integrated
-* Subscription plans can be managed through the admin interface
-* Billing information can be managed through the admin interface
-
-## 12. 🔔 Notification Center
-
-The project includes an in-app Notification Center with a bell icon for displaying user-specific notifications.
+The application includes an in-app Notification Center with a notification bell.
 
 ### Notification Features
 
-* Like notifications when another user likes your post
-* Comment notifications when another user comments on your post
+* Like notifications
+* Comment notifications
 * Subscription activation notifications
 * Subscription renewal notifications
 * Unread notification count
-* Read/unread notification status
-* Mark individual notifications as read
-* Mark individual notifications as unread
+* Read/unread status
+* Mark individual notification as read
+* Mark individual notification as unread
 * Mark all notifications as read
 * Responsive notification dropdown
 * JWT-protected notification APIs
 
-### Notification API Endpoints
+### Notification Types
+
+```text
+like
+comment
+subscription
+```
+
+---
+
+# 21. Notification API Endpoints
 
 | Method | Endpoint                                  | Description                      |
 | ------ | ----------------------------------------- | -------------------------------- |
@@ -150,17 +530,9 @@ The project includes an in-app Notification Center with a bell icon for displayi
 | PUT    | `/notifications/{notification_id}/unread` | Mark notification as unread      |
 | PUT    | `/notifications/read-all`                 | Mark all notifications as read   |
 
-### Notification Types
-
-* `like`
-* `comment`
-* `subscription`
-
 ### Notification Testing
 
-The Notification Center was tested successfully through the dashboard and API endpoints.
-
-The following were verified:
+The following were tested:
 
 * Notification bell
 * Notification dropdown
@@ -172,91 +544,157 @@ The following were verified:
 * Mark as unread
 * Mark all as read
 
-## 13. 🤖 AI Support Chat
+---
 
-The project includes an AI Support Chat feature that provides instant assistance to authenticated users through a floating support widget in the dashboard.
+# 22. 🤖 AI Support Chat
 
-### AI Support Features
+The dashboard includes an AI Support Chat feature for authenticated users.
 
-* Floating AI Support chat widget
-* Clean and responsive chat interface
+### Features
+
+* Floating AI Support button
+* Responsive chat interface
 * User message input
-* Instant AI response display
+* AI response display
 * Scrollable conversation history
 * Persistent chat history
 * User-specific chat history
-* JWT-protected AI Support APIs
-* Chat activity stored in the database
+* JWT-protected APIs
+* Database conversation tracking
 * Responsive dashboard integration
 
 ### Supported Topics
-
-The AI Support assistant provides predefined responses for:
 
 * Creating posts
 * Editing posts
 * Deleting posts
 * Subscription management
-* Billing and payment information
+* Billing information
 * Profile management
 * Dashboard analytics
 * General platform FAQs
 
-### AI Support API Endpoints
+---
+
+# 23. AI Support API Endpoints
 
 | Method | Endpoint           | Description                                        |
 | ------ | ------------------ | -------------------------------------------------- |
 | GET    | `/api/ai-support/` | Get current user's AI support chat history         |
 | POST   | `/api/ai-support/` | Send a question and receive an AI support response |
 
-### AI Support Database Tracking
+### Stored Conversation Data
 
-Each AI support conversation stores:
+Each conversation stores:
 
-* User ID
-* User question
-* AI response
-* Created timestamp
+```text
+User ID
+User Question
+AI Response
+Created Timestamp
+```
 
 ### AI Response System
 
-The current implementation uses predefined FAQ-based responses to provide instant assistance without requiring an external AI service.
+The current implementation uses predefined FAQ-based responses instead of an external AI service.
 
-The backend receives the user's question, processes it through the FAQ response system, returns the appropriate response, and stores the conversation in the database.
+The backend:
 
-### AI Support Testing
+1. Receives the user's question.
+2. Processes it through the FAQ response system.
+3. Returns the appropriate response.
+4. Stores the conversation in the database.
 
-The following questions were tested successfully:
+---
 
-* How do I create a post?
-* How do I edit my post?
-* How do I delete my post?
-* How does subscription work?
-* How can I check my billing?
-* How do I manage my profile?
-* What does the dashboard analytics show?
-* General platform questions
+# 24. Dashboard & Analytics
 
-The AI Support Chat was tested successfully through:
+The dashboard provides authenticated users with their own blog statistics.
 
-* Swagger API
-* Dashboard chat interface
-* Chat history loading
-* Multiple user questions
-* Page refresh and persistent history
+### Dashboard Statistics
 
-## 14. Testing
+* Total posts
+* Comments made
+* Likes received
+* Total post views
 
-The following project features were tested successfully:
+### Analytics Charts
 
-### Authentication
+Interactive Chart.js charts display:
+
+* Likes per post
+* Comments per post
+
+Users only receive analytics related to their own posts.
+
+---
+
+# 25. Post View Tracking
+
+Post view tracking is implemented using the `views` field.
+
+### Features
+
+* Post views are tracked
+* Each post view increments the count
+* Total views are displayed on the dashboard
+* User-specific view analytics are displayed
+
+---
+
+# 26. Dashboard UI
+
+The dashboard includes:
+
+* Responsive layout
+* Dark-mode interface
+* Statistics cards
+* Chart.js analytics
+* JWT-based API data loading
+* Mobile-responsive design
+* Access Token management
+* Authentication interface
+* Google login
+* Facebook login
+* Email login
+* Email signup
+* Notification Center
+* Toast notifications
+* AI Support Chat
+* Logout functionality
+
+---
+
+# 27. Django Admin
+
+A Django admin project is integrated into the application.
+
+### Admin Features
+
+* Subscription plan management
+* Billing information management
+* Administrative data management
+
+---
+
+# 28. Testing
+
+The following features have been tested.
+
+## Authentication
 
 * User registration
-* User login
+* Email/password login
 * JWT authentication
 * Protected APIs
+* Auth0 authentication
+* Google login
+* Facebook login
+* Auth0 callback
+* User creation/update
+* Logout
 
-### Blog Features
+## Blog Features
 
 * Post creation
 * Post retrieval
@@ -264,8 +702,9 @@ The following project features were tested successfully:
 * Post deletion
 * Post ownership validation
 * Image support
+* Post view tracking
 
-### Comments & Likes
+## Comments & Likes
 
 * Comment creation
 * Comment retrieval
@@ -274,7 +713,7 @@ The following project features were tested successfully:
 * Unlike functionality
 * Duplicate-like prevention
 
-### Notifications
+## Notifications
 
 * Email notifications
 * In-app Notification Center
@@ -284,7 +723,7 @@ The following project features were tested successfully:
 * Read/unread functionality
 * Mark all as read
 
-### Subscriptions & Billing
+## Subscriptions & Billing
 
 * Subscription plans
 * Subscription creation
@@ -294,7 +733,7 @@ The following project features were tested successfully:
 * Billing history
 * Invoice generation
 
-### Dashboard
+## Dashboard
 
 * Dashboard statistics
 * Likes analytics
@@ -303,7 +742,7 @@ The following project features were tested successfully:
 * JWT-based dashboard access
 * Responsive dashboard UI
 
-### AI Support
+## AI Support
 
 * AI Support chat interface
 * FAQ-based responses
@@ -318,10 +757,122 @@ The following project features were tested successfully:
 * Persistent chat history
 * JWT-protected AI Support endpoints
 
-## 15. GitHub
+---
 
-Project source code has been committed and pushed to GitHub.
+# 29. Local Development
 
-Repository:
+### Install Dependencies
+
+Create and activate the virtual environment:
+
+```powershell
+python -m venv venv
+.\venv\Scripts\activate
+```
+
+Install dependencies:
+
+```powershell
+pip install -r requirements.txt
+```
+
+### Environment Configuration
+
+Create a `.env` file and configure the required application settings.
+
+Example Auth0 configuration:
+
+```env
+AUTH0_DOMAIN=
+AUTH0_CLIENT_ID=
+AUTH0_CLIENT_SECRET=
+AUTH0_CALLBACK_URL=http://127.0.0.1:8000/auth/callback/
+```
+
+Keep all secrets private.
+
+### Start the Application
+
+```powershell
+uvicorn app.main:app --reload
+```
+
+Application:
+
+```text
+http://127.0.0.1:8000
+```
+
+Dashboard:
+
+```text
+http://127.0.0.1:8000/dashboard
+```
+
+Swagger:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+---
+
+# 30. Project Documentation
+
+Additional Auth0 documentation is available in:
+
+```text
+AUTH0_DOCUMENTATION.md
+```
+
+The document covers:
+
+* Auth0 application setup
+* Google configuration
+* Facebook configuration
+* Callback URL
+* Allowed Web Origins
+* Allowed Logout URLs
+* Environment variables
+* Authentication flow
+* Local testing
+* Error handling
+* Security considerations
+
+---
+
+# 31. Project Structure
+
+```text
+Blog_management/
+│
+├── app/
+│   ├── core/
+│   ├── models/
+│   ├── routes/
+│   ├── schemas/
+│   ├── services/
+│   ├── utils/
+│   ├── static/
+│   │   └── dashboard.html
+│   ├── database.py
+│   └── main.py
+│
+├── django_admin/
+│
+├── AUTH0_DOCUMENTATION.md
+├── README.md
+├── requirements.txt
+├── .env
+└── .gitignore
+```
+
+---
+
+# 32. GitHub
+
+Project source code:
 
 `https://github.com/Pradeeshs14/Blog_Management.git`
+
+The repository contains the FastAPI backend, dashboard, authentication implementation, subscription system, notification system, AI Support system, and project documentation.
