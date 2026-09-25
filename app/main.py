@@ -5,6 +5,7 @@ load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
 from app.database import Base, engine
 from app.models import User, Post, Comment, Like, Notification
 
@@ -16,6 +17,7 @@ from app.routes.subscription import router as subscription_router
 from app.routes.dashboard import router as dashboard_router
 from app.routes.notification import router as notification_router
 from app.routes.ai_support import router as ai_support_router
+from app.routes.auth0 import router as auth0_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -24,6 +26,11 @@ app = FastAPI(
     description="A mini blogging system built with FastAPI",
     version="1.0.0",
 )
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="blog-management-auth0-session-secret",
+)
+
 app.mount("/media", StaticFiles(directory="media"), name="media")
 
 app.include_router(auth_router)
@@ -34,6 +41,7 @@ app.include_router(subscription_router)
 app.include_router(dashboard_router)
 app.include_router(notification_router)
 app.include_router(ai_support_router)
+app.include_router(auth0_router)
 
 @app.get("/dashboard")
 def dashboard():

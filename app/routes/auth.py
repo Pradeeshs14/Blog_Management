@@ -10,7 +10,6 @@ from app.core.security import (
     create_access_token,
 )
 
-
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"],
@@ -24,23 +23,34 @@ def register(
 ):
     existing_user = (
         db.query(User)
-        .filter(
-            (User.username == data.username)
-            | (User.email == data.email)
-        )
+        .filter(User.email == data.email)
         .first()
     )
 
     if existing_user:
         raise HTTPException(
             status_code=400,
-            detail="Username or email already exists",
+            detail="Email already exists",
         )
 
+    base_username = data.email.split("@")[0][:45]
+    username = base_username
+    counter = 1
+
+    while (
+        db.query(User)
+        .filter(User.username == username)
+        .first()
+    ):
+        username = f"{base_username[:44]}{counter}"
+        counter += 1
+
     user = User(
-        username=data.username,
+        username=username,
+        name=data.name,
         email=data.email,
         password=hash_password(data.password),
+        provider="email",
     )
 
     db.add(user)
@@ -62,17 +72,20 @@ def login(
 ):
     user = (
         db.query(User)
-        .filter(User.username == data.username)
+        .filter(User.email == data.email)
         .first()
     )
 
-    if not user or not verify_password(
-        data.password,
-        user.password,
-    ):
+    if not user:
         raise HTTPException(
             status_code=401,
-            detail="Invalid username or password",
+            detail="Invalid email or password",
+        )
+
+    if not verify_password(data.password, user.password):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password",
         )
 
     token = create_access_token(user.id)
